@@ -5,7 +5,6 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
-import org.luaj.vm2.lib.ZeroArgFunction;
 
 import io.mrarm.uploadlib.ui.web.WebActivityController;
 import io.mrarm.uploadlib.ui.web.WebBrowserController;
@@ -20,6 +19,7 @@ public class WebActivityControllerWrapper extends LuaTable {
         this.controller = controller;
 
         set("setLoadingState", new setLoadingState());
+        set("createWebBrowser", new createWebBrowser());
         set("setWebState", new setWebState());
     }
 
@@ -47,13 +47,36 @@ public class WebActivityControllerWrapper extends LuaTable {
         }
     }
 
-    final class setWebState extends TwoArgFunction {
+    final class createWebBrowser extends TwoArgFunction {
         public LuaValue call(LuaValue self, LuaValue v) {
             if (v.istable()) {
                 LuaTable table = v.checktable();
                 try {
                     WebBrowserWrapper browser = WebBrowserWrapper.create(
                             WebActivityControllerWrapper.this, table);
+                    return browser;
+                } catch (InterruptedException e) {
+                    throw new LuaInterruptedException(e);
+                }
+            } else {
+                return new WebBrowserWrapper(WebActivityControllerWrapper.this,
+                        new WebBrowserController(controller));
+            }
+        }
+    }
+
+    final class setWebState extends TwoArgFunction {
+        public LuaValue call(LuaValue self, LuaValue v) {
+            if (v.istable()) {
+                LuaTable table = v.checktable();
+                try {
+                    WebBrowserWrapper browser;
+                    if (table instanceof WebBrowserWrapper) {
+                        browser = (WebBrowserWrapper) table;
+                    } else {
+                        browser = WebBrowserWrapper.create(
+                                WebActivityControllerWrapper.this, table);
+                    }
                     controller.setWebState(browser.getWrapped());
                     return browser;
                 } catch (InterruptedException e) {

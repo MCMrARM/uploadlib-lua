@@ -23,6 +23,7 @@ public class WebBrowserWrapper extends LuaTable implements WebBrowserListener {
                              WebBrowserController controller) {
         this.activityController = activityController;
         this.controller = controller;
+        controller.setListener(this);
 
         set("setUrl", new setUrl());
         set("loadUrl", new loadUrl());
@@ -35,7 +36,6 @@ public class WebBrowserWrapper extends LuaTable implements WebBrowserListener {
                                               LuaTable table) throws InterruptedException {
         WebBrowserController browser = new WebBrowserController(controller.getWrapped());
         WebBrowserWrapper wrapper = new WebBrowserWrapper(controller, browser);
-        browser.setListener(wrapper);
         if (table.get("url").isstring()) {
             if (table.get("loadUrl").isboolean() && table.get("loadUrl").toboolean())
                 browser.loadUrl(table.get("url").checkjstring());
