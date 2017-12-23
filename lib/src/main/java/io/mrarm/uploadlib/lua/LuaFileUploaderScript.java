@@ -2,6 +2,7 @@ package io.mrarm.uploadlib.lua;
 
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaError;
+import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.JsePlatform;
 
 import java.io.Reader;
@@ -38,6 +39,10 @@ public class LuaFileUploaderScript {
         if (info == null)
             throw new LuaError("Script did not call `uploader.register`");
         System.out.println("Uploader loaded: " + info.name + " (" + info.uuid + ")");
+    }
+
+    public LuaValue getGlobal(String name) {
+        return globals.get(name);
     }
 
     public LuaFileUploaderScriptInfo getInfo() {

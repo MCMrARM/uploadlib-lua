@@ -1,3 +1,4 @@
 uploader.register({
-    name = "Test Uploader Script"
+    name = "Test Uploader Script",
+    loginSupported = true
 })

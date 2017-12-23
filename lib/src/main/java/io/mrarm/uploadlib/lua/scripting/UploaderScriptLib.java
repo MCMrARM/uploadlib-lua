@@ -37,6 +37,10 @@ public class UploaderScriptLib extends TwoArgFunction {
                 info.uuid = UUID.fromString(t.get("uuid").checkjstring());
             else
                 info.uuid = UUID.nameUUIDFromBytes(info.name.getBytes());
+            if (t.get("loginSupported").isboolean())
+                info.loginSupported = t.get("loginSupported").checkboolean();
+            if (t.get("loginRequired").isboolean())
+                info.loginRequired = t.get("loginRequired").checkboolean();
             script.onInfoRegistered(info);
             return NONE;
         }
