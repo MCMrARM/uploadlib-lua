@@ -3,7 +3,7 @@ uploader.register({
     loginSupported = true
 })
 
-function uploader_login(controller)
+function uploader.login(controller)
     controller:setLoadingState()
     os.execute("sleep 10")
 end

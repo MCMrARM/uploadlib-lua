@@ -51,7 +51,7 @@ public class LuaFileUploadProvider extends SimpleLoginFileUploadProvider {
 
     @Override
     public void handleLogInFlow(WebActivityController controller) throws InterruptedException {
-        script.getGlobal("uploader_login").invoke(CoerceJavaToLua.coerce(controller));
+        script.getGlobal("uploader").get("login").invoke(CoerceJavaToLua.coerce(controller));
     }
 
 }
