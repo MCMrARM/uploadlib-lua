@@ -1,5 +1,6 @@
 package io.mrarm.uploadlib.lua.scripting;
 
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
@@ -51,14 +52,15 @@ public class WebActivityControllerWrapper extends LuaTable {
             if (v.istable()) {
                 LuaTable table = v.checktable();
                 try {
-                    WebBrowserController browser = WebBrowserWrapper.create(
+                    WebBrowserWrapper browser = WebBrowserWrapper.create(
                             WebActivityControllerWrapper.this, table);
-                    controller.setWebState(browser);
+                    controller.setWebState(browser.getWrapped());
+                    return browser;
                 } catch (InterruptedException e) {
                     throw new LuaInterruptedException(e);
                 }
             }
-            return NONE;
+            throw new LuaError("Invalid argument given to setWebState (must be a table)");
         }
     }
 

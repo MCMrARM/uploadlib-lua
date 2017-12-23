@@ -31,7 +31,7 @@ public class WebBrowserWrapper extends LuaTable implements WebBrowserListener {
         set("finish", new finish());
     }
 
-    public static WebBrowserController create(WebActivityControllerWrapper controller,
+    public static WebBrowserWrapper create(WebActivityControllerWrapper controller,
                                               LuaTable table) throws InterruptedException {
         WebBrowserController browser = new WebBrowserController(controller.getWrapped());
         WebBrowserWrapper wrapper = new WebBrowserWrapper(controller, browser);
@@ -50,7 +50,11 @@ public class WebBrowserWrapper extends LuaTable implements WebBrowserListener {
             if (table.get(callback).isfunction())
                 wrapper.set(callback, table.get(callback));
         }
-        return browser;
+        return wrapper;
+    }
+
+    public WebBrowserController getWrapped() {
+        return controller;
     }
 
     final class setUrl extends TwoArgFunction {
