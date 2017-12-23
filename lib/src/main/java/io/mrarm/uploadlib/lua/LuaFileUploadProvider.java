@@ -53,11 +53,13 @@ public class LuaFileUploadProvider extends SimpleLoginFileUploadProvider {
 
     @Override
     public void handleLogInFlow(WebActivityController controller) throws InterruptedException {
+        WebActivityControllerWrapper wrapper = new WebActivityControllerWrapper(controller);
         try {
-            script.getGlobal("uploader").get("login").invoke(
-                    new WebActivityControllerWrapper(controller));
+            script.getGlobal("uploader").get("login").invoke(wrapper);
         } catch (LuaInterruptedException e) {
             throw (InterruptedException) e.getCause();
+        } finally {
+            wrapper.releaseCookiesHandle();
         }
     }
 
