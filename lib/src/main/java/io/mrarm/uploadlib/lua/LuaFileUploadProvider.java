@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import io.mrarm.uploadlib.FileUploadRequest;
 import io.mrarm.uploadlib.FileUploadUserContext;
+import io.mrarm.uploadlib.lua.scripting.LuaInterruptedException;
+import io.mrarm.uploadlib.lua.scripting.WebActivityControllerWrapper;
 import io.mrarm.uploadlib.ui.login.SimpleLoginFileUploadProvider;
 import io.mrarm.uploadlib.ui.web.WebActivityController;
 
@@ -51,7 +53,12 @@ public class LuaFileUploadProvider extends SimpleLoginFileUploadProvider {
 
     @Override
     public void handleLogInFlow(WebActivityController controller) throws InterruptedException {
-        script.getGlobal("uploader").get("login").invoke(CoerceJavaToLua.coerce(controller));
+        try {
+            script.getGlobal("uploader").get("login").invoke(
+                    new WebActivityControllerWrapper(controller));
+        } catch (LuaInterruptedException e) {
+            throw (InterruptedException) e.getCause();
+        }
     }
 
 }

@@ -1,6 +1,5 @@
 package io.mrarm.uploadlib.lua;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
