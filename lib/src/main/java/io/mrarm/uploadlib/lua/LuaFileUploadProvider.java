@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.luaj.vm2.lib.jse.CoerceJavaToLua;
-
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.UUID;
