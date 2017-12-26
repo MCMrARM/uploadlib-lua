@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import okhttp3.ConnectionPool;
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -49,7 +50,30 @@ public class HttpLib extends TwoArgFunction {
         return table;
     }
 
-    private void processHeaders(Request.Builder requestBuilder, LuaTable headers) {
+    static void processHeaders(Headers.Builder headerBuilder, LuaTable headers) {
+        LuaValue k = LuaValue.NIL;
+        while (true) {
+            Varargs n = headers.next(k);
+            if ((k = n.arg1()).isnil())
+                break;
+            String headerName = k.checkjstring();
+            headerBuilder.removeAll(headerName);
+            LuaValue v = n.arg(2);
+            if (v.isstring()) {
+                headerBuilder.add(headerName, v.checkjstring());
+            } else if (v.istable()) {
+                LuaValue k2 = LuaValue.NIL;
+                while (true) {
+                    Varargs n2 = v.next(k2);
+                    if ((k2 = n2.arg1()).isnil())
+                        break;
+                    headerBuilder.add(headerName, n2.arg(2).checkjstring());
+                }
+            }
+        }
+    }
+
+    private static void processHeaders(Request.Builder requestBuilder, LuaTable headers) {
         LuaValue k = LuaValue.NIL;
         while (true) {
             Varargs n = headers.next(k);
@@ -80,7 +104,7 @@ public class HttpLib extends TwoArgFunction {
             requestBody = (RequestBody) t.get("body").checkuserdata();
         requestBuilder.method(method, requestBody);
         if (t.get("headers").istable())
-            processHeaders(requestBuilder, t.get("headers").checktable());
+            processHeaders(requestBuilder, null, t.get("headers").checktable());
         return requestBuilder.build();
     }
 

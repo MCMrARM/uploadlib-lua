@@ -8,6 +8,7 @@ import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.ThreeArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -17,6 +18,7 @@ public class HttpMultipartLib extends TwoArgFunction {
     public LuaValue call(LuaValue modname, LuaValue env) {
         LuaTable table = new LuaTable();
         table.set("body", new body());
+        table.set("part", new part());
         table.set("formData", new formData());
 
         table.set("MIXED", new LuaUserdata(MultipartBody.MIXED));
@@ -42,6 +44,18 @@ public class HttpMultipartLib extends TwoArgFunction {
                 builder.addPart((MultipartBody.Part) val.checkuserdata(MultipartBody.Part.class));
             }
             return new LuaUserdata(builder.build());
+        }
+    }
+
+    final class part extends TwoArgFunction {
+        public LuaValue call(LuaValue body, LuaValue headers) {
+            RequestBody bodyData = (RequestBody) body.checkuserdata(RequestBody.class);
+            if (headers.istable()) {
+                Headers.Builder headersBuilder = new Headers.Builder();
+                HttpLib.processHeaders(headersBuilder, headers.checktable());
+                return new LuaUserdata(MultipartBody.Part.create(headersBuilder.build(), bodyData));
+            }
+            return new LuaUserdata(MultipartBody.Part.create(bodyData));
         }
     }
 
