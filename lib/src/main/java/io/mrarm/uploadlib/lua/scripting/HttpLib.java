@@ -104,7 +104,7 @@ public class HttpLib extends TwoArgFunction {
             requestBody = (RequestBody) t.get("body").checkuserdata();
         requestBuilder.method(method, requestBody);
         if (t.get("headers").istable())
-            processHeaders(requestBuilder, null, t.get("headers").checktable());
+            processHeaders(requestBuilder, t.get("headers").checktable());
         return requestBuilder.build();
     }
 
