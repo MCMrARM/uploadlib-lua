@@ -13,13 +13,19 @@ function uploader.login(controller)
 
     resp = http.post({
         url = "http://httpbin.org/post",
-        body = http.body("text/plain; charset=utf-8", "This is a test!"),
+        -- body = http.body("text/plain; charset=utf-8", "This is a test!"),
+        body = http.jsonBody({
+            test = {
+                array = {1, 2, 3, 4, 5},
+                text = "An example"
+            }
+        }),
         headers = {
             ["User-Agent"] = "test",
             ["Accept"] = {"application/json", "text/plain"}
         }
     })
-    print(resp:stringBody())
+    print(json.encode(resp:jsonBody()))
 
     controller:setWebState({
         url = "https://example.com/",

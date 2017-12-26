@@ -1,5 +1,8 @@
 package io.mrarm.uploadlib.lua.scripting;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaUserdata;
@@ -9,6 +12,7 @@ import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
@@ -18,6 +22,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HttpLib extends TwoArgFunction {
+
+    private static final MediaType MEDIA_TYPE_JSON =
+            MediaType.parse("application/json; charset=utf-8");
 
     private static final ConnectionPool connectionPool = new ConnectionPool();
 
@@ -37,6 +44,7 @@ public class HttpLib extends TwoArgFunction {
         table.set("patch", new request("PATCH"));
 
         table.set("body", new body());
+        table.set("jsonBody", new jsonBody());
         env.set("http", table);
         return table;
     }
@@ -105,6 +113,22 @@ public class HttpLib extends TwoArgFunction {
             else
                 throw new LuaError("Invalid data type");
             return new LuaUserdata(requestBody);
+        }
+    }
+
+    final class jsonBody extends OneArgFunction {
+        public LuaValue call(LuaValue data) {
+            try {
+                StringWriter writer = new StringWriter();
+                JsonGenerator generator = new JsonFactory()
+                        .createGenerator(writer);
+                JsonLib.serialize(generator, data.checktable());
+                generator.close();
+                writer.close();
+                return new LuaUserdata(RequestBody.create(MEDIA_TYPE_JSON, writer.toString()));
+            } catch (IOException e) {
+                throw new LuaError("IO Error: " + e.getMessage());
+            }
         }
     }
 
