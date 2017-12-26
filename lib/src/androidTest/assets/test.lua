@@ -5,6 +5,7 @@ uploader.register({
 
 jsonTest = json.decode("{\"test\":[{\"test\":\"test\"},{\"number\":2.5}]}")
 print(jsonTest.test[2].number)
+print("Json " .. json.encode(jsonTest))
 
 function uploader.login(controller)
     print("Test!")

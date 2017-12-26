@@ -1,18 +1,23 @@
 package io.mrarm.uploadlib.lua.scripting;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaInteger;
+import org.luaj.vm2.LuaNumber;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +25,28 @@ public class JsonLib extends TwoArgFunction {
 
     public LuaValue call(LuaValue modname, LuaValue env) {
         LuaTable table = new LuaTable();
+        table.set("encode", new encode());
         table.set("decode", new decode());
         env.set("json", table);
         return table;
     }
 
+
+    final class encode extends OneArgFunction {
+        public LuaValue call(LuaValue i) {
+            try {
+                StringWriter writer = new StringWriter();
+                JsonGenerator generator = new JsonFactory()
+                        .createGenerator(writer);
+                serialize(generator, i.checktable());
+                generator.close();
+                writer.close();
+                return LuaValue.valueOf(writer.toString());
+            } catch (IOException e) {
+                throw new LuaError("IO Error: " + e.getMessage());
+            }
+        }
+    }
 
     final class decode extends OneArgFunction {
         public LuaValue call(LuaValue i) {
@@ -38,6 +60,55 @@ public class JsonLib extends TwoArgFunction {
         }
     }
 
+    public static void serialize(JsonGenerator generator, LuaTable table) throws IOException {
+        boolean isArray = isTableArray(table);
+        if (isArray)
+            generator.writeStartArray();
+        else
+            generator.writeStartObject();
+
+        LuaValue k = LuaValue.NIL;
+        while (true) {
+            Varargs n = table.next(k);
+            if ((k = n.arg1()).isnil())
+                break;
+            if (!isArray)
+                generator.writeFieldName(k.tojstring());
+            LuaValue v = n.arg(2);
+            if (v.istable())
+                serialize(generator, v.checktable());
+            else if (v.isinttype())
+                generator.writeNumber(v.checkint());
+            else if (v.type() == TNUMBER)
+                generator.writeNumber(v.checkdouble());
+            else if (v.isstring())
+                generator.writeString(v.checkjstring());
+            else if (v.isboolean())
+                generator.writeBoolean(v.checkboolean());
+            else
+                throw new JsonGenerationException("Invalid entry in table", generator);
+        }
+
+        if (isArray)
+            generator.writeEndArray();
+        else
+            generator.writeEndObject();
+    }
+
+    private static boolean isTableArray(LuaTable table) {
+        if (table.getmetatable() != null && table.getmetatable().get("jsonObject").isboolean() &&
+                table.getmetatable().get("jsonObject").toboolean())
+            return false;
+        LuaValue k = LuaValue.NIL;
+        while (true) {
+            Varargs n = table.next(k);
+            if ((k = n.arg1()).isnil())
+                break;
+            if (!k.isinttype())
+                return false;
+        }
+        return true;
+    }
 
     public static LuaTable parse(JsonParser parser) throws IOException {
         List<ParsedObject> stack = new ArrayList<>(128);
@@ -65,6 +136,11 @@ public class JsonLib extends TwoArgFunction {
                 stack.add(obj);
             } else if (token.isStructEnd()) {
                 ParsedObject obj = stack.remove(stack.size() - 1);
+                if (obj.type == ParsedObject.TYPE_OBJECT && obj.table.length() == 0) {
+                    LuaTable metatable = new LuaTable();
+                    metatable.set("jsonObject", LuaValue.TRUE);
+                    obj.table.setmetatable(metatable);
+                }
                 if (stack.size() == 0)
                     return obj.table;
             } else {
