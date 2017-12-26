@@ -4,13 +4,14 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.UUID;
 
 import io.mrarm.uploadlib.FileUploadRequest;
 import io.mrarm.uploadlib.FileUploadUserContext;
+import io.mrarm.uploadlib.UploadData;
 import io.mrarm.uploadlib.lua.scripting.LuaInterruptedException;
+import io.mrarm.uploadlib.lua.scripting.LuaUserUploadData;
 import io.mrarm.uploadlib.lua.scripting.WebActivityControllerWrapper;
 import io.mrarm.uploadlib.ui.login.SimpleLoginFileUploadProvider;
 import io.mrarm.uploadlib.ui.web.WebActivityController;
@@ -30,7 +31,10 @@ public class LuaFileUploadProvider extends SimpleLoginFileUploadProvider {
     }
 
     @Override
-    public FileUploadRequest upload(@Nullable Context context, @Nullable FileUploadUserContext fileUploadUserContext, @Nullable String s, @Nullable String s1, @NonNull InputStream inputStream) {
+    public FileUploadRequest upload(@Nullable Context ctx,
+                                    @Nullable FileUploadUserContext userContext,
+                                    @NonNull UploadData data) {
+        script.getGlobal("uploader").get("upload").invoke(new LuaUserUploadData(data));
         return null;
     }
 

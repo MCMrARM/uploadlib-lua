@@ -106,10 +106,15 @@ public class HttpLib extends TwoArgFunction {
 
     final class body extends TwoArgFunction {
         public LuaValue call(LuaValue mediaType, LuaValue data) {
+            if (data.isnil() && mediaType instanceof LuaUserUploadData) // Single argument version
+                return new LuaUserdata(LuaUserUploadData.createRequestBody((LuaUserUploadData) mediaType));
+
             MediaType mt = MediaType.parse(mediaType.checkjstring());
             RequestBody requestBody;
             if (data.isstring())
                 requestBody = RequestBody.create(mt, data.checkjstring());
+            else if (data instanceof LuaUserUploadData)
+                requestBody = LuaUserUploadData.createRequestBody((LuaUserUploadData) data);
             else
                 throw new LuaError("Invalid data type");
             return new LuaUserdata(requestBody);
