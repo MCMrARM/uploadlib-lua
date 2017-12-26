@@ -9,7 +9,11 @@ function uploader.login(controller)
 
     resp = http.post({
         url = "http://httpbin.org/post",
-        body = http.body("text/plain; charset=utf-8", "This is a test!")
+        body = http.body("text/plain; charset=utf-8", "This is a test!"),
+        headers = {
+            ["User-Agent"] = "test",
+            ["Accept"] = {"application/json", "text/plain"}
+        }
     })
     print(resp:stringBody())
 

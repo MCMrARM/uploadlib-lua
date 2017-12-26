@@ -4,6 +4,7 @@ import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaUserdata;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 
@@ -40,6 +41,29 @@ public class HttpLib extends TwoArgFunction {
         return table;
     }
 
+    private void processHeaders(Request.Builder requestBuilder, LuaTable headers) {
+        LuaValue k = LuaValue.NIL;
+        while (true) {
+            Varargs n = headers.next(k);
+            if ((k = n.arg1()).isnil())
+                break;
+            String headerName = k.checkjstring();
+            requestBuilder.removeHeader(headerName);
+            LuaValue v = n.arg(2);
+            if (v.isstring()) {
+                requestBuilder.addHeader(headerName, v.checkjstring());
+            } else if (v.istable()) {
+                LuaValue k2 = LuaValue.NIL;
+                while (true) {
+                    Varargs n2 = v.next(k2);
+                    if ((k2 = n2.arg1()).isnil())
+                        break;
+                    requestBuilder.addHeader(headerName, n2.arg(2).checkjstring());
+                }
+            }
+        }
+    }
+
     private Request makeRequest(String method, LuaTable t) {
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.url(t.get("url").checkjstring());
@@ -47,6 +71,8 @@ public class HttpLib extends TwoArgFunction {
         if (t.get("body").isuserdata(RequestBody.class))
             requestBody = (RequestBody) t.get("body").checkuserdata();
         requestBuilder.method(method, requestBody);
+        if (t.get("headers").istable())
+            processHeaders(requestBuilder, t.get("headers").checktable());
         return requestBuilder.build();
     }
 
