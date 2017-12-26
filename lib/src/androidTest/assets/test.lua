@@ -3,6 +3,9 @@ uploader.register({
     loginSupported = true
 })
 
+jsonTest = json.decode("{\"test\":[{\"test\":\"test\"},{\"number\":2.5}]}")
+print(jsonTest.test[2].number)
+
 function uploader.login(controller)
     print("Test!")
     controller:setLoadingState()

@@ -8,6 +8,7 @@ import org.luaj.vm2.lib.jse.JsePlatform;
 import java.io.Reader;
 
 import io.mrarm.uploadlib.lua.scripting.HttpLib;
+import io.mrarm.uploadlib.lua.scripting.JsonLib;
 import io.mrarm.uploadlib.lua.scripting.UploaderScriptLib;
 
 public class LuaFileUploaderScript {
@@ -19,6 +20,7 @@ public class LuaFileUploaderScript {
     public LuaFileUploaderScript() {
         globals = JsePlatform.standardGlobals();
         globals.load(new UploaderScriptLib(this));
+        globals.load(new JsonLib());
         globals.load(new HttpLib());
     }
 
