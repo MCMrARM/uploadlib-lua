@@ -13,7 +13,6 @@ import org.luaj.vm2.lib.TwoArgFunction;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import okhttp3.Response;
@@ -26,7 +25,7 @@ public class HttpResponseWrapper extends LuaTable {
         this.response = response;
 
         set("code", new code());
-        set("stringBody", new stringBody());
+        set("textBody", new textBody());
         set("bytesBody", new bytesBody());
         set("jsonBody", new jsonBody());
         set("header", new header());
@@ -42,7 +41,7 @@ public class HttpResponseWrapper extends LuaTable {
         }
     }
 
-    final class stringBody extends TwoArgFunction {
+    final class textBody extends TwoArgFunction {
         public LuaValue call(LuaValue self, LuaValue v) {
             try {
                 return LuaValue.valueOf(response.body().string());

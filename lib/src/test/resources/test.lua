@@ -8,5 +8,5 @@ function uploader.upload(file)
         url = "http://httpbin.org/post",
         body = http.body(file)
     })
-    print(resp:stringBody())
+    print(resp:textBody())
 end
