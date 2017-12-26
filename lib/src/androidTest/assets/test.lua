@@ -25,6 +25,8 @@ function uploader.login(controller)
             ["Accept"] = {"application/json", "text/plain"}
         }
     })
+    print("Server header: " .. resp:header("Server"))
+    print("Headers: " .. json.encode(resp:allHeaders()))
     print(json.encode(resp:jsonBody()))
 
     controller:setWebState({
