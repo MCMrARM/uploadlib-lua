@@ -27,6 +27,7 @@ public class JsonLib extends TwoArgFunction {
         LuaTable table = new LuaTable();
         table.set("encode", new encode());
         table.set("decode", new decode());
+        table.set("emptyObject", new emptyObject());
         env.set("json", table);
         return table;
     }
@@ -57,6 +58,16 @@ public class JsonLib extends TwoArgFunction {
             } catch (IOException e) {
                 throw new LuaError("IO Error: " + e.getMessage());
             }
+        }
+    }
+
+    final class emptyObject extends OneArgFunction {
+        public LuaValue call(LuaValue i) {
+            LuaTable obj = new LuaTable();
+            LuaTable metatable = new LuaTable();
+            metatable.set("jsonObject", LuaValue.TRUE);
+            obj.setmetatable(metatable);
+            return obj;
         }
     }
 
