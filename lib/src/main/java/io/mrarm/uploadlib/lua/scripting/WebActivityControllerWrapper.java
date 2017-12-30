@@ -14,6 +14,7 @@ public class WebActivityControllerWrapper extends LuaTable {
 
     private final WebActivityController controller;
     private WebViewCookieHandle cookiesHandle;
+    private WebBrowserCookies luaCookiesObject;
 
     public WebActivityControllerWrapper(WebActivityController controller) {
         this.controller = controller;
@@ -21,6 +22,7 @@ public class WebActivityControllerWrapper extends LuaTable {
         set("setLoadingState", new setLoadingState());
         set("createWebBrowser", new createWebBrowser());
         set("setWebState", new setWebState());
+        set("getWebBrowserCookies", new getWebBrowserCookies());
     }
 
     public WebActivityController getWrapped() {
@@ -84,6 +86,19 @@ public class WebActivityControllerWrapper extends LuaTable {
                 }
             }
             throw new LuaError("Invalid argument given to setWebState (must be a table)");
+        }
+    }
+
+    final class getWebBrowserCookies extends OneArgFunction {
+        public LuaValue call(LuaValue self) {
+            if (luaCookiesObject == null) {
+                try {
+                    luaCookiesObject = new WebBrowserCookies(obtainCookiesHandle());
+                } catch (InterruptedException e) {
+                    throw new LuaInterruptedException(e);
+                }
+            }
+            return luaCookiesObject;
         }
     }
 
