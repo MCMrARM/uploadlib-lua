@@ -115,13 +115,9 @@ public class LuaSerializer {
         writer.append('\"');
     }
 
-    private static String[] IDENTIFIER_BLACKLIST = new String[] {"and", "break", "do", "else",
-            "elseif", "end", "false", "for", "function", "if", "in", "local", "nil", "not", "or",
-            "repeat", "return", "then", "true", "until", "while"};
-
     private static boolean isIdentifier(String text) {
-        for (int i = IDENTIFIER_BLACKLIST.length - 1; i >= 0; --i)
-            if (IDENTIFIER_BLACKLIST[i].equals(text))
+        for (int i = Token.KEYWORDS.length - 1; i >= 0; --i)
+            if (Token.KEYWORDS[i].equals(text))
                 return false;
         for (int i = text.length() - 1; i >= 0; --i) {
             char c = text.charAt(i);
