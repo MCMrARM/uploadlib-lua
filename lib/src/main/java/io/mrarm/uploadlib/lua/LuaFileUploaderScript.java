@@ -10,6 +10,7 @@ import java.io.Reader;
 import io.mrarm.uploadlib.lua.scripting.HttpLib;
 import io.mrarm.uploadlib.lua.scripting.HttpMultipartLib;
 import io.mrarm.uploadlib.lua.scripting.JsonLib;
+import io.mrarm.uploadlib.lua.scripting.SerializationLib;
 import io.mrarm.uploadlib.lua.scripting.UploaderScriptLib;
 
 public class LuaFileUploaderScript {
@@ -24,6 +25,7 @@ public class LuaFileUploaderScript {
         globals.load(new JsonLib());
         globals.load(new HttpLib());
         globals.load(new HttpMultipartLib());
+        globals.load(new SerializationLib());
     }
 
     public void loadFromFile(String filePath) {
